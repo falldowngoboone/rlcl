@@ -4,10 +4,9 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-const rlclState = JSON.parse(localStorage.getItem('rlcl') || {});
-console.log(rlclState);
+const items = JSON.parse(localStorage.getItem('rlcl-items')) || [];
 
-ReactDOM.render(<App initialItems={rlclState.items} />, document.getElementById('root'));
+ReactDOM.render(<App initialItems={items} />, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
