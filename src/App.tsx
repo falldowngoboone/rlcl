@@ -1,19 +1,24 @@
 import React from 'react';
-import uniqid from 'uniqid';
 
-function App({initialItems = []}) {
-  const [items, setItems] = React.useState(initialItems);
+import { Item } from './models';
+
+type AppProps = {
+  initialItems: Item[];
+};
+
+function App({ initialItems = [] }: AppProps) {
+  const [items, setItems] = React.useState<Item[]>(initialItems);
 
   React.useEffect(() => {
     saveItems(items);
   }, [items]);
 
   function handleAddItem() {
-    setItems([...items, createItem('New item')]);
+    setItems([...items, new Item('New item')]);
   }
 
-  function handleChangeItem(e) {
-    const target = e.target;
+  function handleChangeItem(e: React.FormEvent<HTMLInputElement>) {
+    const target = e.currentTarget;
     const [, id, prop] = target.name.split('-');
 
     if (prop === 'value' && target.value.trim() === '') {
@@ -24,9 +29,12 @@ function App({initialItems = []}) {
     const index = items.findIndex(i => i.id === id);
     const newItems = [...items];
 
-    newItems[index][prop] = target.type === 'checkbox'
-      ? target.checked : target.value;
-    
+    if (target.type === 'checkbox') {
+      newItems[index].done = target.checked;
+    } else {
+      newItems[index].value = target.value;
+    }
+
     setItems(newItems);
   }
 
@@ -46,30 +54,29 @@ function App({initialItems = []}) {
   );
 }
 
-function ListItem({ id, value, checked, onChange }) {
+type ListItemProps = {
+  id: string;
+  value: string;
+  done: boolean;
+  onChange: React.FormEventHandler<HTMLInputElement>;
+};
+
+function ListItem({ id, value, done, onChange }: ListItemProps) {
   return (
     <span>
       <input
         name={`item-${id}-checked`}
         type="checkbox"
-        checked={checked}
+        checked={done}
         onChange={onChange}
       />
-      <input
-        name={`item-${id}-value`}
-        value={value}
-        onChange={onChange}
-      />
+      <input name={`item-${id}-value`} value={value} onChange={onChange} />
     </span>
-  )
+  );
 }
 
 export default App;
 
-function createItem(value) {
-  return { id: `${uniqid()}`, value, checked: false };
-}
-
-function saveItems(items) {
+function saveItems(items: Item[]): void {
   localStorage.setItem('rlcl-items', JSON.stringify(items));
 }

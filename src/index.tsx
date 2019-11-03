@@ -4,7 +4,9 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-const items = JSON.parse(localStorage.getItem('rlcl-items')) || [];
+const items = JSON.parse(
+  localStorage.getItem('rlcl-items') || JSON.stringify([])
+);
 
 ReactDOM.render(<App initialItems={items} />, document.getElementById('root'));
 
