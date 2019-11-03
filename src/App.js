@@ -71,5 +71,5 @@ function createItem(value) {
 }
 
 function saveItems(items) {
-  localStorage.setItem('rlcl', JSON.stringify({ items }));
+  localStorage.setItem('rlcl-items', JSON.stringify(items));
 }
