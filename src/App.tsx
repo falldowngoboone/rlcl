@@ -1,41 +1,43 @@
 import React from 'react';
 
-import { Item } from './models';
+import {
+  useItemsState,
+  useItemsDispatch,
+  addItem,
+  removeItem,
+  updateItem,
+} from './store';
 
-type AppProps = {
-  initialItems: Item[];
-};
-
-function App({ initialItems = [] }: AppProps) {
-  const [items, setItems] = React.useState<Item[]>(initialItems);
-
-  React.useEffect(() => {
-    saveItems(items);
-  }, [items]);
+function App() {
+  const { items } = useItemsState();
+  const dispatch = useItemsDispatch();
 
   function handleAddItem() {
-    setItems([...items, new Item('New item')]);
+    addItem(dispatch, 'New item');
   }
 
-  function handleChangeItem(e: React.FormEvent<HTMLInputElement>) {
-    const target = e.currentTarget;
-    const [, id, prop] = target.name.split('-');
+  function handleChangeItem(event: React.FormEvent<HTMLInputElement>) {
+    const target = event.currentTarget;
+    const [, id] = target.name.split('-');
 
-    if (prop === 'value' && target.value.trim() === '') {
-      setItems(items.filter(i => i.id !== id));
+    const changedItem = items.find(i => i.id === id);
+
+    if (!changedItem) {
       return;
     }
 
-    const index = items.findIndex(i => i.id === id);
-    const newItems = [...items];
-
-    if (target.type === 'checkbox') {
-      newItems[index].done = target.checked;
-    } else {
-      newItems[index].value = target.value;
+    if (!target.value.trim()) {
+      removeItem(dispatch, changedItem);
+      return;
     }
 
-    setItems(newItems);
+    if (target.type === 'checkbox') {
+      changedItem.done = target.checked;
+    } else if (target.value.trim()) {
+      changedItem.value = target.value;
+    }
+
+    updateItem(dispatch, changedItem);
   }
 
   return (
@@ -45,7 +47,7 @@ function App({ initialItems = [] }: AppProps) {
       <ol>
         {items.map(item => (
           <li key={item.id}>
-            <ListItem id={item.id} onChange={handleChangeItem} {...item} />
+            <ListItem onUpdate={handleChangeItem} {...item} />
           </li>
         ))}
       </ol>
@@ -58,25 +60,27 @@ type ListItemProps = {
   id: string;
   value: string;
   done: boolean;
-  onChange: React.FormEventHandler<HTMLInputElement>;
+  onUpdate: React.FormEventHandler<HTMLInputElement>;
 };
 
-function ListItem({ id, value, done, onChange }: ListItemProps) {
+function ListItem({ id, value, done, onUpdate }: ListItemProps) {
+  const [inputVal, setInputVal] = React.useState(value);
   return (
     <span>
       <input
         name={`item-${id}-checked`}
         type="checkbox"
         checked={done}
-        onChange={onChange}
+        onChange={onUpdate}
       />
-      <input name={`item-${id}-value`} value={value} onChange={onChange} />
+      <input
+        name={`item-${id}-value`}
+        value={inputVal}
+        onBlur={onUpdate}
+        onChange={e => setInputVal(e.target.value)}
+      />
     </span>
   );
 }
 
 export default App;
-
-function saveItems(items: Item[]): void {
-  localStorage.setItem('rlcl-items', JSON.stringify(items));
-}
