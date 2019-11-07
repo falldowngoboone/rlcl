@@ -23,7 +23,7 @@ async function getItems() {
   return new Promise<Item[]>((resolve, reject) => {
     try {
       const items = JSON.parse(
-        localStorage.getItem('rlcl-items') || JSON.stringify('[]')
+        localStorage.getItem('rlcl-items') || JSON.stringify([])
       ) as Item[];
       resolve(items);
     } catch (error) {
