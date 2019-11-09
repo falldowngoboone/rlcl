@@ -19,6 +19,14 @@ export async function update(item: Item) {
   return saveItems(items.map(i => (i.id === item.id ? item : i)));
 }
 
+export async function move(from: number, to: number) {
+  const items = await getItems();
+  to = to < 0 ? 0 : to > items.length - 1 ? items.length - 1 : to;
+  const [removed] = items.splice(from, 1);
+  items.splice(to, 0, removed);
+  return saveItems(items);
+}
+
 async function getItems() {
   return new Promise<Item[]>((resolve, reject) => {
     try {

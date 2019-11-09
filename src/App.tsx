@@ -7,6 +7,7 @@ import {
   addItem,
   removeItem,
   updateItem,
+  reorderItems,
 } from './store';
 import { Item } from './models';
 
@@ -41,18 +42,16 @@ function App() {
   }
 
   function handleChangeItem(item: Item) {
-    const index = items.findIndex(i => i.id === item.id);
-
-    if (index === -1) {
-      return;
-    }
-
     if (!item.value) {
       removeItem(dispatch, item);
       return;
     }
 
     updateItem(dispatch, item);
+  }
+
+  function handleReorderItems(from: number, to: number) {
+    reorderItems(dispatch, from, to);
   }
 
   return (
@@ -72,9 +71,15 @@ function App() {
       <main>
         {Boolean(items.length) && (
           <List>
-            {items.map(item => (
+            {items.map((item, index) => (
               <li key={item.id}>
-                <ListItem onUpdate={handleChangeItem} item={item} {...item} />
+                <ListItem
+                  onUpdate={handleChangeItem}
+                  onReorder={handleReorderItems}
+                  item={item}
+                  index={index}
+                  {...item}
+                />
               </li>
             ))}
           </List>
@@ -87,10 +92,12 @@ function App() {
 
 type ListItemProps = {
   item: Item;
+  index: number;
   onUpdate: (item: Item) => void;
+  onReorder: (from: number, to: number) => void;
 };
 
-function ListItem({ item, onUpdate }: ListItemProps) {
+function ListItem({ item, index, onUpdate, onReorder }: ListItemProps) {
   const [inputVal, setInputVal] = React.useState(item.value);
 
   return (
@@ -124,6 +131,12 @@ function ListItem({ item, onUpdate }: ListItemProps) {
         onFocus={e => e.currentTarget.select()}
         value={inputVal}
       />
+      <button type="button" onClick={() => onReorder(index, index - 1)}>
+        ⬆︎
+      </button>{' '}
+      <button type="button" onClick={() => onReorder(index, index + 1)}>
+        ⬇︎
+      </button>
     </form>
   );
 }
