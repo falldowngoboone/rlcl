@@ -17,10 +17,12 @@ type ItemsAction =
   | { type: 'FETCH' }
   | { type: 'ADD' }
   | { type: 'REMOVE' }
+  | { type: 'REORDER' }
   | { type: 'UPDATE' }
   | { type: 'FETCHED'; payload: Item[] }
   | { type: 'ADDED'; payload: Item[] }
   | { type: 'REMOVED'; payload: Item[] }
+  | { type: 'REORDERED'; payload: Item[] }
   | { type: 'UPDATED'; payload: Item[] };
 
 const ItemsStateContext = React.createContext<ItemsState | null>(null);
@@ -75,13 +77,16 @@ function statesReducer(state: ItemsState, action: ItemsAction) {
     case 'FETCH':
     case 'ADD':
     case 'REMOVE':
+    case 'REORDER':
     case 'UPDATE':
       return { ...state, isPending: true };
     case 'FETCHED':
     case 'ADDED':
-    case 'REMOVED':
+    case 'REORDERED':
     case 'UPDATED':
       return { ...state, isPending: false, items: action.payload };
+    default:
+      return state;
   }
 }
 
@@ -132,6 +137,21 @@ export async function updateItem(
   try {
     const items = await itemsService.update(item);
     dispatch({ type: 'UPDATED', payload: items });
+    return items;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function reorderItems(
+  dispatch: React.Dispatch<ItemsAction>,
+  from: number,
+  to: number
+) {
+  dispatch({ type: 'REORDER' });
+  try {
+    const items = await itemsService.move(from, to);
+    dispatch({ type: 'REORDERED', payload: items });
     return items;
   } catch (e) {
     console.error(e);
