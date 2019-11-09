@@ -57,10 +57,14 @@ function App() {
   return (
     <div
       css={css`
-        padding: 1.5em;
+        padding: 0.5em;
         max-width: 40em;
         margin: 0 auto;
         background-color: white;
+
+        @media screen and (min-width: 500px) {
+          padding: 1.5em;
+        }
       `}
     >
       <GlobalStyle />
@@ -84,9 +88,9 @@ function App() {
             ))}
           </List>
         )}
-        <button onClick={handleAddItem} type="button">
-          Add Item
-        </button>
+        <Button onClick={handleAddItem} type="button">
+          + Add Item
+        </Button>
       </main>
     </div>
   );
@@ -111,7 +115,7 @@ function ListItem({ item, index, onUpdate, onReorder }: ListItemProps) {
   }, []);
 
   return (
-    <form
+    <Form
       onSubmit={event => {
         event.preventDefault();
         onUpdate({
@@ -130,8 +134,11 @@ function ListItem({ item, index, onUpdate, onReorder }: ListItemProps) {
           onUpdate({ ...item, done: event.currentTarget.checked });
         }}
         ref={checkbox}
+        aria-label={`Mark ${item.value} as ${
+          item.done ? 'unpacked' : 'packed'
+        }`}
       />
-      <StyledInput
+      <Input
         id={`item-${item.id}-value`}
         name="itemValue"
         onBlur={event => {
@@ -142,29 +149,78 @@ function ListItem({ item, index, onUpdate, onReorder }: ListItemProps) {
         value={inputVal}
         placeholder="New Item"
         ref={input}
+        aria-label="item"
       />
-      <button type="button" onClick={() => onReorder(index, index - 1)}>
+      <Button
+        type="button"
+        onClick={() => onReorder(index, index - 1)}
+        aria-label={`Move ${item.value} up a position`}
+      >
         ⬆︎
-      </button>{' '}
-      <button type="button" onClick={() => onReorder(index, index + 1)}>
+      </Button>{' '}
+      <Button
+        type="button"
+        onClick={() => onReorder(index, index + 1)}
+        aria-label={`Move ${item.value} down a position`}
+      >
         ⬇︎
-      </button>
-    </form>
+      </Button>
+    </Form>
   );
 }
 
 export default App;
 
 const List = styled.ol`
-  font-size: 1.5em;
+  font-size: 1.25em;
   list-style-type: none;
   padding: 0;
+
+  @media screen and (min-width: 500px) {
+    font-size: 1.5em;
+  }
 `;
 
-const StyledInput = styled.input`
+const Form = styled.form`
+  display: flex;
+  align-items: center;
+`;
+
+const Input = styled.input`
   font-size: 1em;
   font-family: inherit;
   border: none;
+  flex: 1 1 auto;
+  min-width: 0px;
+  border-radius: 6px;
+  padding: 0 0.5em;
+  line-height: 2em;
+
+  &:hover,
+  &:focus {
+    background-color: #eee;
+  }
+`;
+
+const Button = styled.button.attrs({ type: 'button' })`
+  font-size: 1em;
+  font-family: inherit;
+  appearance: none;
+  display: inline-block;
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+  border-radius: 6px;
+  padding: 0 0.5em;
+  line-height: 2em;
+
+  &:hover,
+  &:focus {
+    background-color: #eee;
+  }
+
+  &::-moz-focus-inner {
+    border: none;
+  }
 `;
 
 const Checkbox = styled.input.attrs({ type: 'checkbox' })`
@@ -174,4 +230,5 @@ const Checkbox = styled.input.attrs({ type: 'checkbox' })`
   font-size: inherit;
   line-height: inherit;
   vertical-align: text-bottom;
+  flex: 0 0 auto;
 `;
