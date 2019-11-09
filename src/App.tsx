@@ -128,7 +128,7 @@ function ListItem({ item, index, onUpdate, onReorder }: ListItemProps) {
           onUpdate({ ...item, value: event.currentTarget.value.trim() });
         }}
         onChange={e => setInputVal(e.currentTarget.value)}
-        onFocus={e => e.currentTarget.select()}
+        onClick={e => e.currentTarget.select()}
         value={inputVal}
       />
       <button type="button" onClick={() => onReorder(index, index - 1)}>
