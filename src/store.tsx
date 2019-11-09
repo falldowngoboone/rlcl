@@ -82,6 +82,7 @@ function statesReducer(state: ItemsState, action: ItemsAction) {
       return { ...state, isPending: true };
     case 'FETCHED':
     case 'ADDED':
+    case 'REMOVED':
     case 'REORDERED':
     case 'UPDATED':
       return { ...state, isPending: false, items: action.payload };
