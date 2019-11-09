@@ -38,7 +38,7 @@ function App() {
   const dispatch = useItemsDispatch();
 
   function handleAddItem() {
-    addItem(dispatch, 'New item');
+    addItem(dispatch, '');
   }
 
   function handleChangeItem(item: Item) {
@@ -84,7 +84,9 @@ function App() {
             ))}
           </List>
         )}
-        <button onClick={handleAddItem}>Add Item</button>
+        <button onClick={handleAddItem} type="button">
+          Add Item
+        </button>
       </main>
     </div>
   );
@@ -99,27 +101,35 @@ type ListItemProps = {
 
 function ListItem({ item, index, onUpdate, onReorder }: ListItemProps) {
   const [inputVal, setInputVal] = React.useState(item.value);
+  const input = React.useRef<HTMLInputElement | null>(null);
+  const checkbox = React.useRef<HTMLInputElement | null>(null);
+
+  React.useEffect(() => {
+    if (input.current && !input.current.value) {
+      input.current.focus();
+    }
+  }, []);
 
   return (
     <form
       onSubmit={event => {
-        const { doneInput, valueInput } = event.currentTarget;
+        event.preventDefault();
         onUpdate({
           ...item,
-          done: doneInput.checked,
-          value: valueInput.value.trim(),
+          done: checkbox.current ? checkbox.current.checked : false,
+          value: input.current ? input.current.value.trim() : '',
         });
-        event.preventDefault();
+        input.current && input.current.blur();
       }}
     >
-      <input
+      <Checkbox
         checked={item.done}
         id={`item-${item.id}-checked`}
         name="itemDone"
         onChange={event => {
           onUpdate({ ...item, done: event.currentTarget.checked });
         }}
-        type="checkbox"
+        ref={checkbox}
       />
       <StyledInput
         id={`item-${item.id}-value`}
@@ -130,6 +140,8 @@ function ListItem({ item, index, onUpdate, onReorder }: ListItemProps) {
         onChange={e => setInputVal(e.currentTarget.value)}
         onClick={e => e.currentTarget.select()}
         value={inputVal}
+        placeholder="New Item"
+        ref={input}
       />
       <button type="button" onClick={() => onReorder(index, index - 1)}>
         ⬆︎
@@ -153,4 +165,13 @@ const StyledInput = styled.input`
   font-size: 1em;
   font-family: inherit;
   border: none;
+`;
+
+const Checkbox = styled.input.attrs({ type: 'checkbox' })`
+  height: 1em;
+  width: 1em;
+  display: inline-block;
+  font-size: inherit;
+  line-height: inherit;
+  vertical-align: text-bottom;
 `;
