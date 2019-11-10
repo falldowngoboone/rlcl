@@ -1,4 +1,13 @@
 import React from 'react';
+import {
+  DragDropContext,
+  DropResult,
+  Droppable,
+  Draggable,
+  DroppableProvided,
+  DraggableProvided,
+  DraggableProvidedDragHandleProps,
+} from 'react-beautiful-dnd';
 import styled, { css, createGlobalStyle } from 'styled-components';
 import 'styled-components/macro';
 import {
@@ -34,8 +43,13 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 function App() {
-  const { items } = useItemsState();
+  const itemsState = useItemsState();
+  const [items, setItems] = React.useState(itemsState.items);
   const dispatch = useItemsDispatch();
+
+  React.useEffect(() => {
+    setItems(itemsState.items);
+  }, [itemsState.items]);
 
   function handleAddItem() {
     addItem(dispatch, '');
@@ -50,60 +64,110 @@ function App() {
     updateItem(dispatch, item);
   }
 
-  function handleReorderItems(from: number, to: number) {
-    reorderItems(dispatch, from, to);
+  function onDragStart() {
+    // Add a little vibration if the browser supports it.
+    // Add's a nice little physical feedback
+    if (window.navigator.vibrate) {
+      window.navigator.vibrate(100);
+    }
+  }
+
+  function onDragEnd(result: DropResult) {
+    // combining item
+    if (result.combine) {
+      // super simple: just removing the dragging item
+      const newItems: Item[] = [...items];
+      newItems.splice(result.source.index, 1);
+      setItems(newItems);
+      return;
+    }
+
+    // dropped outside the list
+    if (!result.destination) {
+      return;
+    }
+
+    if (result.destination.index === result.source.index) {
+      return;
+    }
+
+    const newItems = reorder(
+      items,
+      result.source.index,
+      result.destination.index
+    );
+
+    reorderItems(dispatch, result.source.index, result.destination.index);
+
+    setItems(newItems);
   }
 
   return (
-    <div
-      css={css`
-        padding: 0.5em;
-        max-width: 40em;
-        margin: 0 auto;
-        background-color: white;
+    <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
+      <div
+        css={css`
+          padding: 0.5em;
+          max-width: 40em;
+          margin: 0 auto;
+          background-color: white;
 
-        @media screen and (min-width: 500px) {
-          padding: 1.5em;
-        }
-      `}
-    >
-      <GlobalStyle />
-      <header>
-        <h1>rlcl</h1>
-        <p>A personal roll call for all your things.</p>
-      </header>
-      <main>
-        {Boolean(items.length) && (
-          <List>
-            {items.map((item, index) => (
-              <li key={item.id}>
-                <ListItem
-                  onUpdate={handleChangeItem}
-                  onReorder={handleReorderItems}
-                  item={item}
-                  index={index}
-                  {...item}
-                />
-              </li>
-            ))}
-          </List>
-        )}
-        <Button onClick={handleAddItem} type="button">
-          + Add Item
-        </Button>
-      </main>
-    </div>
+          @media screen and (min-width: 500px) {
+            padding: 1.5em;
+          }
+        `}
+      >
+        <GlobalStyle />
+        <header>
+          <h1>rlcl</h1>
+          <p>A personal roll call for all your things.</p>
+        </header>
+        <main>
+          {Boolean(items.length) && (
+            <Droppable droppableId="item">
+              {(provided: DroppableProvided) => (
+                <List ref={provided.innerRef} {...provided.droppableProps}>
+                  {items.map((item, index) => (
+                    <Draggable
+                      key={item.id}
+                      draggableId={item.id}
+                      index={index}
+                    >
+                      {(provided: DraggableProvided) => (
+                        <li
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                        >
+                          <ListItem
+                            onUpdate={handleChangeItem}
+                            item={item}
+                            handleProps={provided.dragHandleProps}
+                            {...item}
+                          />
+                        </li>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </List>
+              )}
+            </Droppable>
+          )}
+          <Button onClick={handleAddItem} type="button">
+            + Add Item
+          </Button>
+        </main>
+      </div>
+    </DragDropContext>
   );
 }
 
 type ListItemProps = {
   item: Item;
-  index: number;
   onUpdate: (item: Item) => void;
-  onReorder: (from: number, to: number) => void;
+  handleProps: DraggableProvidedDragHandleProps | null;
 };
 
-function ListItem({ item, index, onUpdate, onReorder }: ListItemProps) {
+function ListItem({ item, onUpdate, handleProps }: ListItemProps) {
   const [inputVal, setInputVal] = React.useState(item.value);
   const input = React.useRef<HTMLInputElement | null>(null);
   const checkbox = React.useRef<HTMLInputElement | null>(null);
@@ -151,20 +215,7 @@ function ListItem({ item, index, onUpdate, onReorder }: ListItemProps) {
         ref={input}
         aria-label="item"
       />
-      <Button
-        type="button"
-        onClick={() => onReorder(index, index - 1)}
-        aria-label={`Move ${item.value} up a position`}
-      >
-        ⬆︎
-      </Button>{' '}
-      <Button
-        type="button"
-        onClick={() => onReorder(index, index + 1)}
-        aria-label={`Move ${item.value} down a position`}
-      >
-        ⬇︎
-      </Button>
+      <DragHandle {...handleProps}>☰</DragHandle>
     </Form>
   );
 }
@@ -175,10 +226,6 @@ const List = styled.ol`
   font-size: 1.25em;
   list-style-type: none;
   padding: 0;
-
-  & > * + * {
-    margin-top: 0.25em;
-  }
 
   @media screen and (min-width: 500px) {
     font-size: 1.5em;
@@ -258,6 +305,20 @@ const Button = styled.button.attrs({ type: 'button' })`
   }
 `;
 
+const DragHandle = styled(Button).attrs({ as: 'div' })`
+  color: #ccc;
+
+  @media screen and (pointer: fine) {
+    &:hover {
+      color: inherit;
+    }
+
+    &:active {
+      color: inherit;
+    }
+  }
+`;
+
 const Checkbox = styled.input.attrs({ type: 'checkbox' })`
   height: 1em;
   width: 1em;
@@ -267,3 +328,11 @@ const Checkbox = styled.input.attrs({ type: 'checkbox' })`
   vertical-align: text-bottom;
   flex: 0 0 auto;
 `;
+
+const reorder = (list: any[], startIndex: number, endIndex: number): any[] => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
