@@ -176,6 +176,10 @@ const List = styled.ol`
   list-style-type: none;
   padding: 0;
 
+  & > * + * {
+    margin-top: 0.25em;
+  }
+
   @media screen and (min-width: 500px) {
     font-size: 1.5em;
   }
@@ -193,12 +197,26 @@ const Input = styled.input`
   flex: 1 1 auto;
   min-width: 0px;
   border-radius: 6px;
-  padding: 0 0.5em;
-  line-height: 2em;
+  padding: 0.25em 0.5em;
+  line-height: 1;
+  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
-  &:hover,
   &:focus {
     background-color: #eee;
+  }
+
+  &:active {
+    background-color: #ddd;
+  }
+
+  @media screen and (pointer: fine) {
+    &:hover {
+      background-color: #eee;
+    }
+
+    &:active {
+      background-color: #ddd;
+    }
   }
 `;
 
@@ -210,16 +228,33 @@ const Button = styled.button.attrs({ type: 'button' })`
   background-color: rgba(0, 0, 0, 0);
   border: none;
   border-radius: 6px;
-  padding: 0 0.5em;
-  line-height: 2em;
+  padding: 0.25em 0.5em;
+  line-height: 1;
+  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
-  &:hover,
   &:focus {
     background-color: #eee;
   }
 
+  &:active {
+    background-color: #ddd;
+    color: inherit;
+    transition-duration: 0.1s;
+  }
+
   &::-moz-focus-inner {
     border: none;
+  }
+
+  @media screen and (pointer: fine) {
+    &:hover {
+      background-color: #eee;
+    }
+
+    &:active {
+      background-color: #ddd;
+      color: inherit;
+    }
   }
 `;
 
