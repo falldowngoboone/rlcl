@@ -10,6 +10,8 @@ import {
 } from 'react-beautiful-dnd';
 import styled, { css, createGlobalStyle } from 'styled-components';
 import 'styled-components/macro';
+
+import { ActionableItem } from './service/items';
 import {
   useItemsState,
   useItemsDispatch,
@@ -17,8 +19,8 @@ import {
   removeItem,
   updateItem,
   reorderItems,
+  useItemsService,
 } from './store';
-import { Item } from './models';
 
 const GlobalStyle = createGlobalStyle`
   html {
@@ -43,6 +45,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 function App() {
+  const itemsService = useItemsService();
   const itemsState = useItemsState();
   const [items, setItems] = React.useState(itemsState.items);
   const dispatch = useItemsDispatch();
@@ -52,16 +55,16 @@ function App() {
   }, [itemsState.items]);
 
   function handleAddItem() {
-    addItem(dispatch, '');
+    addItem(dispatch, itemsService, '');
   }
 
-  function handleChangeItem(item: Item) {
+  function handleChangeItem(item: ActionableItem) {
     if (!item.value) {
-      removeItem(dispatch, item);
+      removeItem(dispatch, itemsService, item);
       return;
     }
 
-    updateItem(dispatch, item);
+    updateItem(dispatch, itemsService, item);
   }
 
   function onDragStart() {
@@ -76,7 +79,7 @@ function App() {
     // combining item
     if (result.combine) {
       // super simple: just removing the dragging item
-      const newItems: Item[] = [...items];
+      const newItems: ActionableItem[] = [...items];
       newItems.splice(result.source.index, 1);
       setItems(newItems);
       return;
@@ -97,7 +100,12 @@ function App() {
       result.destination.index
     );
 
-    reorderItems(dispatch, result.source.index, result.destination.index);
+    reorderItems(
+      dispatch,
+      itemsService,
+      result.source.index,
+      result.destination.index
+    );
 
     setItems(newItems);
   }
@@ -162,8 +170,8 @@ function App() {
 }
 
 type ListItemProps = {
-  item: Item;
-  onUpdate: (item: Item) => void;
+  item: ActionableItem;
+  onUpdate: (item: ActionableItem) => void;
   handleProps: DraggableProvidedDragHandleProps | null;
 };
 

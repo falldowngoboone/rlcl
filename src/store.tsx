@@ -1,12 +1,15 @@
 import React from 'react';
 
-import { Item } from './models';
-import * as itemsService from './service';
+import {
+  itemsService,
+  ActionableItem,
+  ActionableItemService,
+} from './service/items';
 
-interface ItemsState {
+type ItemsState = {
   isPending: boolean;
-  items: Item[];
-}
+  items: ActionableItem[];
+};
 
 const initialState: ItemsState = {
   isPending: false,
@@ -19,16 +22,23 @@ type ItemsAction =
   | { type: 'REMOVE' }
   | { type: 'REORDER' }
   | { type: 'UPDATE' }
-  | { type: 'FETCHED'; payload: Item[] }
-  | { type: 'ADDED'; payload: Item[] }
-  | { type: 'REMOVED'; payload: Item[] }
-  | { type: 'REORDERED'; payload: Item[] }
-  | { type: 'UPDATED'; payload: Item[] };
+  | { type: 'FETCHED'; payload: ActionableItem[] }
+  | { type: 'ADDED'; payload: ActionableItem[] }
+  | { type: 'REMOVED'; payload: ActionableItem[] }
+  | { type: 'REORDERED'; payload: ActionableItem[] }
+  | { type: 'UPDATED'; payload: ActionableItem[] };
 
+const ItemsServiceContext = React.createContext<ActionableItemService>(
+  itemsService
+);
 const ItemsStateContext = React.createContext<ItemsState | null>(null);
 const ItemsDispatchContext = React.createContext<React.Dispatch<
   ItemsAction
 > | null>(null);
+
+export function useItemsService() {
+  return React.useContext(ItemsServiceContext);
+}
 
 export function useItemsState() {
   const context = React.useContext(ItemsStateContext);
@@ -52,23 +62,36 @@ export function useItemsDispatch() {
 
 type ItemsProviderProps = {
   children: React.ReactNode;
+  initialState?: Partial<ItemsState>;
+  service?: Partial<ActionableItemService>;
 };
 
-export function ItemsProvider({ children }: ItemsProviderProps) {
+export function ItemsProvider({
+  children,
+  initialState: stateOverrides = {},
+  service: serviceOverrides = {},
+}: ItemsProviderProps) {
   const [itemsState, dispatch] = React.useReducer<
     React.Reducer<ItemsState, ItemsAction>
-  >(statesReducer, initialState);
+  >(statesReducer, { ...initialState, ...stateOverrides });
+
+  const service = React.useMemo(
+    () => ({ ...itemsService, ...serviceOverrides }),
+    [serviceOverrides]
+  );
 
   React.useEffect(() => {
-    getItems(dispatch);
-  }, []);
+    getItems(dispatch, service);
+  }, [service]);
 
   return (
-    <ItemsStateContext.Provider value={itemsState}>
-      <ItemsDispatchContext.Provider value={dispatch}>
-        {children}
-      </ItemsDispatchContext.Provider>
-    </ItemsStateContext.Provider>
+    <ItemsServiceContext.Provider value={service}>
+      <ItemsStateContext.Provider value={itemsState}>
+        <ItemsDispatchContext.Provider value={dispatch}>
+          {children}
+        </ItemsDispatchContext.Provider>
+      </ItemsStateContext.Provider>
+    </ItemsServiceContext.Provider>
   );
 }
 
@@ -91,7 +114,10 @@ function statesReducer(state: ItemsState, action: ItemsAction) {
   }
 }
 
-export async function getItems(dispatch: React.Dispatch<ItemsAction>) {
+export async function getItems(
+  dispatch: React.Dispatch<ItemsAction>,
+  itemsService: Pick<ActionableItemService, 'fetch'>
+) {
   dispatch({ type: 'FETCH' });
   try {
     const items = await itemsService.fetch();
@@ -104,6 +130,7 @@ export async function getItems(dispatch: React.Dispatch<ItemsAction>) {
 
 export async function addItem(
   dispatch: React.Dispatch<ItemsAction>,
+  itemsService: Pick<ActionableItemService, 'add'>,
   value: string
 ) {
   dispatch({ type: 'ADD' });
@@ -118,7 +145,8 @@ export async function addItem(
 
 export async function removeItem(
   dispatch: React.Dispatch<ItemsAction>,
-  item: Item
+  itemsService: Pick<ActionableItemService, 'remove'>,
+  item: ActionableItem
 ) {
   dispatch({ type: 'REMOVE' });
   try {
@@ -132,7 +160,8 @@ export async function removeItem(
 
 export async function updateItem(
   dispatch: React.Dispatch<ItemsAction>,
-  item: Item
+  itemsService: Pick<ActionableItemService, 'update'>,
+  item: ActionableItem
 ) {
   dispatch({ type: 'UPDATE' });
   try {
@@ -146,6 +175,7 @@ export async function updateItem(
 
 export async function reorderItems(
   dispatch: React.Dispatch<ItemsAction>,
+  itemsService: Pick<ActionableItemService, 'move'>,
   from: number,
   to: number
 ) {
