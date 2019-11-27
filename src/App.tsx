@@ -10,15 +10,17 @@ import {
 } from 'react-beautiful-dnd';
 import styled, { css, createGlobalStyle } from 'styled-components';
 import 'styled-components/macro';
+
+import { ActionableItem } from './service/actionable-items';
 import {
-  useItemsState,
-  useItemsDispatch,
-  addItem,
-  removeItem,
-  updateItem,
-  reorderItems,
-} from './store';
-import { Item } from './models';
+  useActionableItemsState,
+  useActionableItemsDispatch,
+  addActionableItem,
+  removeActionableItem,
+  updateActionableItem,
+  reorderActionableItems,
+  useActionableItemsService,
+} from './store/actionable-items';
 
 const GlobalStyle = createGlobalStyle`
   html {
@@ -43,25 +45,26 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 function App() {
-  const itemsState = useItemsState();
+  const itemsService = useActionableItemsService();
+  const itemsState = useActionableItemsState();
   const [items, setItems] = React.useState(itemsState.items);
-  const dispatch = useItemsDispatch();
+  const dispatch = useActionableItemsDispatch();
 
   React.useEffect(() => {
     setItems(itemsState.items);
   }, [itemsState.items]);
 
   function handleAddItem() {
-    addItem(dispatch, '');
+    addActionableItem(dispatch, itemsService, '');
   }
 
-  function handleChangeItem(item: Item) {
+  function handleChangeItem(item: ActionableItem) {
     if (!item.value) {
-      removeItem(dispatch, item);
+      removeActionableItem(dispatch, itemsService, item);
       return;
     }
 
-    updateItem(dispatch, item);
+    updateActionableItem(dispatch, itemsService, item);
   }
 
   function onDragStart() {
@@ -76,7 +79,7 @@ function App() {
     // combining item
     if (result.combine) {
       // super simple: just removing the dragging item
-      const newItems: Item[] = [...items];
+      const newItems: ActionableItem[] = [...items];
       newItems.splice(result.source.index, 1);
       setItems(newItems);
       return;
@@ -97,7 +100,12 @@ function App() {
       result.destination.index
     );
 
-    reorderItems(dispatch, result.source.index, result.destination.index);
+    reorderActionableItems(
+      dispatch,
+      itemsService,
+      result.source.index,
+      result.destination.index
+    );
 
     setItems(newItems);
   }
@@ -162,8 +170,8 @@ function App() {
 }
 
 type ListItemProps = {
-  item: Item;
-  onUpdate: (item: Item) => void;
+  item: ActionableItem;
+  onUpdate: (item: ActionableItem) => void;
   handleProps: DraggableProvidedDragHandleProps | null;
 };
 

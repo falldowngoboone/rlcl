@@ -2,12 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { ItemsProvider } from './store';
+import { ActionableItemsProvider } from './store/actionable-items';
 
 ReactDOM.render(
-  <ItemsProvider>
+  <ActionableItemsProvider>
     <App />
-  </ItemsProvider>,
+  </ActionableItemsProvider>,
   document.getElementById('root')
 );
 
