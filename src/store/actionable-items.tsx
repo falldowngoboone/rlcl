@@ -1,22 +1,22 @@
 import React from 'react';
 
 import {
-  itemsService,
+  actionableItemsService,
   ActionableItem,
   ActionableItemService,
-} from './service/items';
+} from '../service/actionable-items';
 
-type ItemsState = {
+type ActionableItemsState = {
   isPending: boolean;
   items: ActionableItem[];
 };
 
-const initialState: ItemsState = {
+const initialState: ActionableItemsState = {
   isPending: false,
   items: [],
 };
 
-type ItemsAction =
+type ActionableItemsAction =
   | { type: 'FETCH' }
   | { type: 'ADD' }
   | { type: 'REMOVE' }
@@ -28,20 +28,22 @@ type ItemsAction =
   | { type: 'REORDERED'; payload: ActionableItem[] }
   | { type: 'UPDATED'; payload: ActionableItem[] };
 
-const ItemsServiceContext = React.createContext<ActionableItemService>(
-  itemsService
+const ActionableItemsServiceContext = React.createContext<
+  ActionableItemService
+>(actionableItemsService);
+const ActionableItemsStateContext = React.createContext<ActionableItemsState | null>(
+  null
 );
-const ItemsStateContext = React.createContext<ItemsState | null>(null);
-const ItemsDispatchContext = React.createContext<React.Dispatch<
-  ItemsAction
+const ActionableItemsDispatchContext = React.createContext<React.Dispatch<
+  ActionableItemsAction
 > | null>(null);
 
-export function useItemsService() {
-  return React.useContext(ItemsServiceContext);
+export function useActionableItemsService() {
+  return React.useContext(ActionableItemsServiceContext);
 }
 
-export function useItemsState() {
-  const context = React.useContext(ItemsStateContext);
+export function useActionableItemsState() {
+  const context = React.useContext(ActionableItemsStateContext);
   if (context === null) {
     throw new Error(
       `'useItemsState' must be used in a child of 'ItemsProvider'`
@@ -50,8 +52,8 @@ export function useItemsState() {
   return context;
 }
 
-export function useItemsDispatch() {
-  const context = React.useContext(ItemsDispatchContext);
+export function useActionableItemsDispatch() {
+  const context = React.useContext(ActionableItemsDispatchContext);
   if (context === null) {
     throw new Error(
       `'useItemsDispatch' must be used in a child of 'ItemsProvider'`
@@ -60,42 +62,45 @@ export function useItemsDispatch() {
   return context;
 }
 
-type ItemsProviderProps = {
+type ActionableItemsProviderProps = {
   children: React.ReactNode;
-  initialState?: Partial<ItemsState>;
+  initialState?: Partial<ActionableItemsState>;
   service?: Partial<ActionableItemService>;
 };
 
-export function ItemsProvider({
+export function ActionableItemsProvider({
   children,
   initialState: stateOverrides = {},
   service: serviceOverrides = {},
-}: ItemsProviderProps) {
+}: ActionableItemsProviderProps) {
   const [itemsState, dispatch] = React.useReducer<
-    React.Reducer<ItemsState, ItemsAction>
+    React.Reducer<ActionableItemsState, ActionableItemsAction>
   >(statesReducer, { ...initialState, ...stateOverrides });
 
   const service = React.useMemo(
-    () => ({ ...itemsService, ...serviceOverrides }),
+    () => ({ ...actionableItemsService, ...serviceOverrides }),
     [serviceOverrides]
   );
 
   React.useEffect(() => {
-    getItems(dispatch, service);
+    getActionableItems(dispatch, service);
   }, [service]);
 
   return (
-    <ItemsServiceContext.Provider value={service}>
-      <ItemsStateContext.Provider value={itemsState}>
-        <ItemsDispatchContext.Provider value={dispatch}>
+    <ActionableItemsServiceContext.Provider value={service}>
+      <ActionableItemsStateContext.Provider value={itemsState}>
+        <ActionableItemsDispatchContext.Provider value={dispatch}>
           {children}
-        </ItemsDispatchContext.Provider>
-      </ItemsStateContext.Provider>
-    </ItemsServiceContext.Provider>
+        </ActionableItemsDispatchContext.Provider>
+      </ActionableItemsStateContext.Provider>
+    </ActionableItemsServiceContext.Provider>
   );
 }
 
-function statesReducer(state: ItemsState, action: ItemsAction) {
+function statesReducer(
+  state: ActionableItemsState,
+  action: ActionableItemsAction
+) {
   switch (action.type) {
     case 'FETCH':
     case 'ADD':
@@ -114,8 +119,8 @@ function statesReducer(state: ItemsState, action: ItemsAction) {
   }
 }
 
-export async function getItems(
-  dispatch: React.Dispatch<ItemsAction>,
+export async function getActionableItems(
+  dispatch: React.Dispatch<ActionableItemsAction>,
   itemsService: Pick<ActionableItemService, 'fetch'>
 ) {
   dispatch({ type: 'FETCH' });
@@ -128,8 +133,8 @@ export async function getItems(
   }
 }
 
-export async function addItem(
-  dispatch: React.Dispatch<ItemsAction>,
+export async function addActionableItem(
+  dispatch: React.Dispatch<ActionableItemsAction>,
   itemsService: Pick<ActionableItemService, 'add'>,
   value: string
 ) {
@@ -143,8 +148,8 @@ export async function addItem(
   }
 }
 
-export async function removeItem(
-  dispatch: React.Dispatch<ItemsAction>,
+export async function removeActionableItem(
+  dispatch: React.Dispatch<ActionableItemsAction>,
   itemsService: Pick<ActionableItemService, 'remove'>,
   item: ActionableItem
 ) {
@@ -158,8 +163,8 @@ export async function removeItem(
   }
 }
 
-export async function updateItem(
-  dispatch: React.Dispatch<ItemsAction>,
+export async function updateActionableItem(
+  dispatch: React.Dispatch<ActionableItemsAction>,
   itemsService: Pick<ActionableItemService, 'update'>,
   item: ActionableItem
 ) {
@@ -173,8 +178,8 @@ export async function updateItem(
   }
 }
 
-export async function reorderItems(
-  dispatch: React.Dispatch<ItemsAction>,
+export async function reorderActionableItems(
+  dispatch: React.Dispatch<ActionableItemsAction>,
   itemsService: Pick<ActionableItemService, 'move'>,
   from: number,
   to: number

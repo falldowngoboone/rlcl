@@ -11,16 +11,16 @@ import {
 import styled, { css, createGlobalStyle } from 'styled-components';
 import 'styled-components/macro';
 
-import { ActionableItem } from './service/items';
+import { ActionableItem } from './service/actionable-items';
 import {
-  useItemsState,
-  useItemsDispatch,
-  addItem,
-  removeItem,
-  updateItem,
-  reorderItems,
-  useItemsService,
-} from './store';
+  useActionableItemsState,
+  useActionableItemsDispatch,
+  addActionableItem,
+  removeActionableItem,
+  updateActionableItem,
+  reorderActionableItems,
+  useActionableItemsService,
+} from './store/actionable-items';
 
 const GlobalStyle = createGlobalStyle`
   html {
@@ -45,26 +45,26 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 function App() {
-  const itemsService = useItemsService();
-  const itemsState = useItemsState();
+  const itemsService = useActionableItemsService();
+  const itemsState = useActionableItemsState();
   const [items, setItems] = React.useState(itemsState.items);
-  const dispatch = useItemsDispatch();
+  const dispatch = useActionableItemsDispatch();
 
   React.useEffect(() => {
     setItems(itemsState.items);
   }, [itemsState.items]);
 
   function handleAddItem() {
-    addItem(dispatch, itemsService, '');
+    addActionableItem(dispatch, itemsService, '');
   }
 
   function handleChangeItem(item: ActionableItem) {
     if (!item.value) {
-      removeItem(dispatch, itemsService, item);
+      removeActionableItem(dispatch, itemsService, item);
       return;
     }
 
-    updateItem(dispatch, itemsService, item);
+    updateActionableItem(dispatch, itemsService, item);
   }
 
   function onDragStart() {
@@ -100,7 +100,7 @@ function App() {
       result.destination.index
     );
 
-    reorderItems(
+    reorderActionableItems(
       dispatch,
       itemsService,
       result.source.index,

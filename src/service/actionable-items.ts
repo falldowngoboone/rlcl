@@ -3,7 +3,7 @@ import { Service } from '../types';
 
 export type ActionableItemService = Service<ActionableItem>;
 
-export const itemsService: ActionableItemService = {
+export const actionableItemsService: ActionableItemService = {
   async fetch() {
     return getItems();
   },
