@@ -70,8 +70,8 @@ type ActionableItemsProviderProps = {
 
 export function ActionableItemsProvider({
   children,
-  initialState: stateOverrides = {},
-  service: serviceOverrides = {},
+  initialState: stateOverrides,
+  service: serviceOverrides,
 }: ActionableItemsProviderProps) {
   const [itemsState, dispatch] = React.useReducer<
     React.Reducer<ActionableItemsState, ActionableItemsAction>
