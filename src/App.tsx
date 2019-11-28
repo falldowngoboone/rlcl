@@ -7,6 +7,7 @@ import {
   DroppableProvided,
   DraggableProvided,
   DraggableProvidedDragHandleProps,
+  DraggableStateSnapshot,
 } from 'react-beautiful-dnd';
 import styled, { css, createGlobalStyle } from 'styled-components';
 import 'styled-components/macro';
@@ -47,8 +48,9 @@ const GlobalStyle = createGlobalStyle`
 function App() {
   const itemsService = useActionableItemsService();
   const itemsState = useActionableItemsState();
-  const [items, setItems] = React.useState(itemsState.items);
   const dispatch = useActionableItemsDispatch();
+  const [items, setItems] = React.useState(itemsState.items);
+  const [isEditable, setIsEditable] = React.useState(false);
 
   React.useEffect(() => {
     setItems(itemsState.items);
@@ -127,7 +129,28 @@ function App() {
         <GlobalStyle />
         <header>
           <h1>rlcl</h1>
-          <p>A personal roll call for all your things.</p>
+          <div
+            css={css`
+              display: flex;
+              align-items: baseline;
+              justify-content: space-between;
+            `}
+          >
+            <p
+              css={css`
+                margin: 0;
+              `}
+            >
+              A personal roll call for all your things.
+            </p>
+            <Button
+              onClick={() => {
+                setIsEditable(b => !b);
+              }}
+            >
+              {isEditable ? 'Done' : 'Edit'}
+            </Button>
+          </div>
         </header>
         <main>
           {Boolean(items.length) && (
@@ -140,15 +163,30 @@ function App() {
                       draggableId={item.id}
                       index={index}
                     >
-                      {(provided: DraggableProvided) => (
+                      {(
+                        provided: DraggableProvided,
+                        snapshot: DraggableStateSnapshot
+                      ) => (
                         <li
                           ref={provided.innerRef}
                           {...provided.draggableProps}
+                          style={{
+                            backgroundColor: 'white',
+                            borderRadius: '8px',
+                            boxShadow: snapshot.isDragging
+                              ? '0 5px 15px 0 rgba(0, 0, 0, 0.2)'
+                              : 'none',
+                            boxSizing: 'border-box',
+                            display: 'block',
+                            padding: isEditable ? '5px' : '0',
+                            ...provided.draggableProps.style,
+                          }}
                         >
                           <ListItem
                             onUpdate={handleChangeItem}
                             item={item}
                             handleProps={provided.dragHandleProps}
+                            isEditable={isEditable}
                             {...item}
                           />
                         </li>
@@ -173,9 +211,10 @@ type ListItemProps = {
   item: ActionableItem;
   onUpdate: (item: ActionableItem) => void;
   handleProps: DraggableProvidedDragHandleProps | null;
+  isEditable: boolean;
 };
 
-function ListItem({ item, onUpdate, handleProps }: ListItemProps) {
+function ListItem({ item, onUpdate, handleProps, isEditable }: ListItemProps) {
   const [inputVal, setInputVal] = React.useState(item.value);
   const input = React.useRef<HTMLInputElement | null>(null);
   const checkbox = React.useRef<HTMLInputElement | null>(null);
@@ -198,6 +237,7 @@ function ListItem({ item, onUpdate, handleProps }: ListItemProps) {
         input.current && input.current.blur();
       }}
     >
+      {isEditable && <DragHandle {...handleProps}>☰</DragHandle>}
       <Checkbox
         checked={item.done}
         id={`item-${item.id}-checked`}
@@ -223,7 +263,6 @@ function ListItem({ item, onUpdate, handleProps }: ListItemProps) {
         ref={input}
         aria-label="item"
       />
-      <DragHandle {...handleProps}>☰</DragHandle>
     </Form>
   );
 }
@@ -258,6 +297,7 @@ const Input = styled.input`
 
   &:focus {
     background-color: #eee;
+    outline: none;
   }
 
   &:active {
@@ -289,6 +329,7 @@ const Button = styled.button.attrs({ type: 'button' })`
 
   &:focus {
     background-color: #eee;
+    outline: none;
   }
 
   &:active {
