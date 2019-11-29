@@ -9,7 +9,7 @@ import {
   DraggableProvidedDragHandleProps,
   DraggableStateSnapshot,
 } from 'react-beautiful-dnd';
-import styled, { css, createGlobalStyle } from 'styled-components';
+import styled from 'styled-components';
 import 'styled-components/macro';
 
 import { ActionableItem } from './service/actionable-items';
@@ -23,27 +23,8 @@ import {
   useActionableItemsService,
 } from './store/actionable-items';
 
-const GlobalStyle = createGlobalStyle`
-  html {
-    font-size: 100%;
-  }
-
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-      "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-
-    background-color: #eee;
-  }
-
-  code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-      monospace;
-  }
-`;
+import { Button } from './Button';
+import { Layout } from './Layout';
 
 function App() {
   const itemsService = useActionableItemsService();
@@ -114,95 +95,55 @@ function App() {
 
   return (
     <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
-      <div
-        css={css`
-          padding: 0.5em;
-          max-width: 40em;
-          margin: 0 auto;
-          background-color: white;
-
-          @media screen and (min-width: 500px) {
-            padding: 1.5em;
-          }
-        `}
+      <Layout
+        isEditable={isEditable}
+        onToggleEdit={() => {
+          setIsEditable(b => !b);
+        }}
+        onAddItem={handleAddItem}
       >
-        <GlobalStyle />
-        <header>
-          <h1>rlcl</h1>
-          <div
-            css={css`
-              display: flex;
-              align-items: baseline;
-              justify-content: space-between;
-            `}
-          >
-            <p
-              css={css`
-                margin: 0;
-              `}
-            >
-              A personal roll call for all your things.
-            </p>
-            <Button
-              onClick={() => {
-                setIsEditable(b => !b);
-              }}
-            >
-              {isEditable ? 'Done' : 'Edit'}
-            </Button>
-          </div>
-        </header>
-        <main>
-          {Boolean(items.length) && (
-            <Droppable droppableId="item">
-              {(provided: DroppableProvided) => (
-                <List ref={provided.innerRef} {...provided.droppableProps}>
-                  {items.map((item, index) => (
-                    <Draggable
-                      key={item.id}
-                      draggableId={item.id}
-                      index={index}
-                    >
-                      {(
-                        provided: DraggableProvided,
-                        snapshot: DraggableStateSnapshot
-                      ) => (
-                        <li
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          style={{
-                            backgroundColor: 'white',
-                            borderRadius: '8px',
-                            boxShadow: snapshot.isDragging
-                              ? '0 5px 15px 0 rgba(0, 0, 0, 0.2)'
-                              : 'none',
-                            boxSizing: 'border-box',
-                            display: 'block',
-                            padding: isEditable ? '5px' : '0',
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          <ListItem
-                            onUpdate={handleChangeItem}
-                            item={item}
-                            handleProps={provided.dragHandleProps}
-                            isEditable={isEditable}
-                            {...item}
-                          />
-                        </li>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </List>
-              )}
-            </Droppable>
-          )}
-          <Button onClick={handleAddItem} type="button">
-            + Add Item
-          </Button>
-        </main>
-      </div>
+        {Boolean(items.length) && (
+          <Droppable droppableId="item">
+            {(provided: DroppableProvided) => (
+              <List ref={provided.innerRef} {...provided.droppableProps}>
+                {items.map((item, index) => (
+                  <Draggable key={item.id} draggableId={item.id} index={index}>
+                    {(
+                      provided: DraggableProvided,
+                      snapshot: DraggableStateSnapshot
+                    ) => (
+                      <li
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        style={{
+                          backgroundColor: 'white',
+                          borderRadius: '8px',
+                          boxShadow: snapshot.isDragging
+                            ? '0 5px 15px 0 rgba(0, 0, 0, 0.2)'
+                            : 'none',
+                          boxSizing: 'border-box',
+                          display: 'block',
+                          // padding: isEditable ? '5px' : '0',
+                          ...provided.draggableProps.style,
+                        }}
+                      >
+                        <ListItem
+                          onUpdate={handleChangeItem}
+                          item={item}
+                          handleProps={provided.dragHandleProps}
+                          isEditable={isEditable}
+                          {...item}
+                        />
+                      </li>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </List>
+            )}
+          </Droppable>
+        )}
+      </Layout>
     </DragDropContext>
   );
 }
@@ -315,45 +256,6 @@ const Input = styled.input`
   }
 `;
 
-const Button = styled.button.attrs({ type: 'button' })`
-  font-size: 1em;
-  font-family: inherit;
-  appearance: none;
-  display: inline-block;
-  background-color: rgba(0, 0, 0, 0);
-  border: none;
-  border-radius: 6px;
-  padding: 0.25em 0.5em;
-  line-height: 1;
-  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:focus {
-    background-color: #eee;
-    outline: none;
-  }
-
-  &:active {
-    background-color: #ddd;
-    color: inherit;
-    transition-duration: 0.1s;
-  }
-
-  &::-moz-focus-inner {
-    border: none;
-  }
-
-  @media screen and (pointer: fine) {
-    &:hover {
-      background-color: #eee;
-    }
-
-    &:active {
-      background-color: #ddd;
-      color: inherit;
-    }
-  }
-`;
-
 const DragHandle = styled(Button).attrs({ as: 'div' })`
   color: #ccc;
 
@@ -364,6 +266,7 @@ const DragHandle = styled(Button).attrs({ as: 'div' })`
 
     &:active {
       color: inherit;
+      background-color: white;
     }
   }
 `;
