@@ -1,16 +1,6 @@
 import React from 'react';
-import {
-  DragDropContext,
-  DropResult,
-  Droppable,
-  Draggable,
-  DroppableProvided,
-  DraggableProvided,
-  DraggableProvidedDragHandleProps,
-  DraggableStateSnapshot,
-} from 'react-beautiful-dnd';
+import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import styled from 'styled-components';
-import 'styled-components/macro';
 
 import { ActionableItem } from './service/actionable-items';
 import {
@@ -24,9 +14,10 @@ import {
 } from './store/actionable-items';
 
 import { Button } from './Button';
+import { ItemList } from './ItemList';
 import { Layout } from './Layout';
 
-function App() {
+export default function App() {
   const itemsService = useActionableItemsService();
   const itemsState = useActionableItemsState();
   const dispatch = useActionableItemsDispatch();
@@ -35,10 +26,14 @@ function App() {
 
   React.useEffect(() => {
     setItems(itemsState.items);
-  }, [itemsState.items]);
 
-  function handleAddItem() {
-    addActionableItem(dispatch, itemsService, '');
+    if (!itemsState.items.length && isEditable) {
+      setIsEditable(false);
+    }
+  }, [isEditable, itemsState.items]);
+
+  function handleAddItem(value: string) {
+    addActionableItem(dispatch, itemsService, value);
   }
 
   function handleChangeItem(item: ActionableItem) {
@@ -48,6 +43,10 @@ function App() {
     }
 
     updateActionableItem(dispatch, itemsService, item);
+  }
+
+  function handleRemoveItem(item: ActionableItem) {
+    removeActionableItem(dispatch, itemsService, item);
   }
 
   function onDragStart() {
@@ -100,185 +99,51 @@ function App() {
         onToggleEdit={() => {
           setIsEditable(b => !b);
         }}
-        onAddItem={handleAddItem}
       >
-        {Boolean(items.length) && (
-          <Droppable droppableId="item">
-            {(provided: DroppableProvided) => (
-              <List ref={provided.innerRef} {...provided.droppableProps}>
-                {items.map((item, index) => (
-                  <Draggable key={item.id} draggableId={item.id} index={index}>
-                    {(
-                      provided: DraggableProvided,
-                      snapshot: DraggableStateSnapshot
-                    ) => (
-                      <li
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        style={{
-                          backgroundColor: 'white',
-                          borderRadius: '8px',
-                          boxShadow: snapshot.isDragging
-                            ? '0 5px 15px 0 rgba(0, 0, 0, 0.2)'
-                            : 'none',
-                          boxSizing: 'border-box',
-                          display: 'block',
-                          // padding: isEditable ? '5px' : '0',
-                          ...provided.draggableProps.style,
-                        }}
-                      >
-                        <ListItem
-                          onUpdate={handleChangeItem}
-                          item={item}
-                          handleProps={provided.dragHandleProps}
-                          isEditable={isEditable}
-                          {...item}
-                        />
-                      </li>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </List>
-            )}
-          </Droppable>
+        <ItemList
+          items={items}
+          isEditable={isEditable}
+          onDoneToggle={handleChangeItem}
+          onRemove={handleRemoveItem}
+        />
+        {!isEditable && (
+          <AddForm
+            onSubmit={event => {
+              const newItemField = event.currentTarget.newItem;
+              const newItemValue = newItemField.value.trim();
+
+              if (newItemValue) {
+                handleAddItem(newItemValue);
+              }
+
+              newItemField.value = '';
+
+              event.preventDefault();
+            }}
+          >
+            <Input name="newItem" />
+            <Button type="submit">+</Button>
+          </AddForm>
         )}
       </Layout>
     </DragDropContext>
   );
 }
 
-type ListItemProps = {
-  item: ActionableItem;
-  onUpdate: (item: ActionableItem) => void;
-  handleProps: DraggableProvidedDragHandleProps | null;
-  isEditable: boolean;
-};
-
-function ListItem({ item, onUpdate, handleProps, isEditable }: ListItemProps) {
-  const [inputVal, setInputVal] = React.useState(item.value);
-  const input = React.useRef<HTMLInputElement | null>(null);
-  const checkbox = React.useRef<HTMLInputElement | null>(null);
-
-  React.useEffect(() => {
-    if (input.current && !input.current.value) {
-      input.current.focus();
-    }
-  }, []);
-
-  return (
-    <Form
-      onSubmit={event => {
-        event.preventDefault();
-        onUpdate({
-          ...item,
-          done: checkbox.current ? checkbox.current.checked : false,
-          value: input.current ? input.current.value.trim() : '',
-        });
-        input.current && input.current.blur();
-      }}
-    >
-      {isEditable && <DragHandle {...handleProps}>☰</DragHandle>}
-      <Checkbox
-        checked={item.done}
-        id={`item-${item.id}-checked`}
-        name="itemDone"
-        onChange={event => {
-          onUpdate({ ...item, done: event.currentTarget.checked });
-        }}
-        ref={checkbox}
-        aria-label={`Mark ${item.value} as ${
-          item.done ? 'unpacked' : 'packed'
-        }`}
-      />
-      <Input
-        id={`item-${item.id}-value`}
-        name="itemValue"
-        onBlur={event => {
-          onUpdate({ ...item, value: event.currentTarget.value.trim() });
-        }}
-        onChange={e => setInputVal(e.currentTarget.value)}
-        onClick={e => e.currentTarget.select()}
-        value={inputVal}
-        placeholder="New Item"
-        ref={input}
-        aria-label="item"
-      />
-    </Form>
-  );
-}
-
-export default App;
-
-const List = styled.ol`
-  font-size: 1.25em;
-  list-style-type: none;
-  padding: 0;
-
-  @media screen and (min-width: 500px) {
-    font-size: 1.5em;
-  }
-`;
-
-const Form = styled.form`
-  display: flex;
-  align-items: center;
-`;
-
 const Input = styled.input`
-  font-size: 1em;
-  font-family: inherit;
-  border: none;
-  flex: 1 1 auto;
-  min-width: 0px;
-  border-radius: 6px;
-  padding: 0.25em 0.5em;
-  line-height: 1;
-  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:focus {
-    background-color: #eee;
-    outline: none;
-  }
-
-  &:active {
-    background-color: #ddd;
-  }
-
-  @media screen and (pointer: fine) {
-    &:hover {
-      background-color: #eee;
-    }
-
-    &:active {
-      background-color: #ddd;
-    }
-  }
+  font: inherit;
+  border: 0.125em solid black;
+  border-radius: 2em;
+  padding: 0.25em 0.75em;
 `;
 
-const DragHandle = styled(Button).attrs({ as: 'div' })`
-  color: #ccc;
+const AddForm = styled.form`
+  display: flex;
 
-  @media screen and (pointer: fine) {
-    &:hover {
-      color: inherit;
-    }
-
-    &:active {
-      color: inherit;
-      background-color: white;
-    }
+  & > ${Input} {
+    flex: 1 1;
+    min-width: 0;
   }
-`;
-
-const Checkbox = styled.input.attrs({ type: 'checkbox' })`
-  height: 1em;
-  width: 1em;
-  display: inline-block;
-  font-size: inherit;
-  line-height: inherit;
-  vertical-align: text-bottom;
-  flex: 0 0 auto;
 `;
 
 const reorder = (list: any[], startIndex: number, endIndex: number): any[] => {

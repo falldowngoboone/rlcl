@@ -1,20 +1,15 @@
 import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
+
 import { Button } from './Button';
 
 type LayoutProps = {
   children: React.ReactNode;
   isEditable: boolean;
-  onAddItem: () => void;
   onToggleEdit: () => void;
 };
 
-export function Layout({
-  children,
-  isEditable,
-  onAddItem,
-  onToggleEdit,
-}: LayoutProps) {
+export function Layout({ children, isEditable, onToggleEdit }: LayoutProps) {
   return (
     <Page>
       <GlobalStyle />
@@ -24,9 +19,6 @@ export function Layout({
       <Main>{children}</Main>
       <Footer>
         <Button onClick={onToggleEdit}>{isEditable ? 'Done' : 'Edit'}</Button>
-        <Button onClick={onAddItem} type="button">
-          + Add Item
-        </Button>
       </Footer>
     </Page>
   );
@@ -38,7 +30,8 @@ const GlobalStyle = createGlobalStyle`
   }
 
   html {
-    font-size: 100%;
+    font-size: 125%;
+    text-size-adjust: none;
   }
 
   body {
@@ -106,4 +99,5 @@ const Footer = styled(Container).attrs({ as: 'footer' })`
   left: 0;
   right: 0;
   bottom: 0;
+  background-color: white;
 `;
