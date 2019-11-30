@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
-export const Button = styled.button.attrs({ type: 'button' })`
+export const Button = styled.button.attrs(props => ({
+  type: props.type || 'button',
+}))`
   font-size: 1em;
   font-family: inherit;
   appearance: none;
