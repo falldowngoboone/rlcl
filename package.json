@@ -1,44 +1,24 @@
 {
-  "name": "rlcl",
+  "name": "roll-call",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "react": "^16.11.0",
-    "react-beautiful-dnd": "^12.0.0",
-    "react-dom": "^16.11.0",
-    "react-scripts": "3.2.0",
-    "styled-components": "^4.4.1",
-    "uniqid": "^5.0.3"
-  },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "@emotion/react": "^11.4.0",
+    "@emotion/styled": "^11.3.0",
+    "next": "11.0.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.21",
-    "@types/node": "^12.12.5",
-    "@types/react": "^16.9.11",
-    "@types/react-beautiful-dnd": "^11.0.3",
-    "@types/react-dom": "^16.9.3",
-    "@types/styled-components": "^4.1.20",
-    "@types/uniqid": "^4.1.3",
-    "typescript": "^3.6.4"
+    "@types/react": "17.0.13",
+    "eslint": "7.30.0",
+    "eslint-config-next": "11.0.1",
+    "typescript": "4.3.5"
   }
 }

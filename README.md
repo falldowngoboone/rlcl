@@ -1,5 +1,6 @@
-# rlcl
+1. AppProvider mounts and bootstraps the app and gets the user
+2. The user and user token, if they exist, are passed into the client hook
+3. The client hook is used to fetch resource data (books and list items)
+4. The fetching is controlled by `react-query` in order to cache responses and optimistically update client UI
 
-A roll call for travel (it's a packing list).
-
-[![Netlify Status](https://api.netlify.com/api/v1/badges/39283cee-9816-492c-8ae2-42aead7c6b1e/deploy-status)](https://app.netlify.com/sites/rlcl/deploys)
+Don't remember the reason behind onSettled.
