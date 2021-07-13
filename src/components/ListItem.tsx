@@ -1,16 +1,19 @@
 import * as React from "react";
+import { useUpdateItem } from "../context/items";
 
 import { Item } from "../model";
 
 type ListItemProps = {
   item: Item;
-  onUpdate: (updates: Partial<Item>) => void;
+  onToggle: (checked: boolean) => void;
+  checked: boolean;
 };
 
-function ListItem({ item, onUpdate }: ListItemProps) {
+function ListItem({ item, checked, onToggle }: ListItemProps) {
   const [editView, setEditView] = React.useState(false);
   const [itemName, setItemName] = React.useState(item.name);
   const nameEditInput = React.useRef<HTMLInputElement>(null);
+  const { mutate: updateItem } = useUpdateItem();
 
   React.useEffect(() => {
     if (editView && nameEditInput.current) {
@@ -23,7 +26,7 @@ function ListItem({ item, onUpdate }: ListItemProps) {
       const newName = itemName.trim();
 
       if (newName && newName !== item.name) {
-        onUpdate({ name: newName });
+        updateItem({ id: item.id, name: newName });
       } else {
         setItemName(item.name);
       }
@@ -32,7 +35,7 @@ function ListItem({ item, onUpdate }: ListItemProps) {
 
       event.preventDefault();
     },
-    [item.name, itemName, onUpdate]
+    [item.name, itemName, item.id, updateItem]
   );
 
   const handleFormKeyDown = React.useCallback(
@@ -70,9 +73,10 @@ function ListItem({ item, onUpdate }: ListItemProps) {
         <input
           type="checkbox"
           name="itemChecked"
-          checked={item.checked}
+          checked={checked}
           onChange={(event) => {
-            onUpdate({ checked: event.target.checked });
+            console.log(event.target.checked);
+            onToggle(event.target.checked);
           }}
         />{" "}
         {item.name}

@@ -1,22 +1,32 @@
 import * as React from "react";
-import { Item, List } from "../model";
+import { useCreateItem } from "../context/items";
+import { List } from "../model";
 
 type AddItemFormProps = {
   list: List;
-  items: Item[];
-  onSubmit: (item: Item) => void;
+  onSubmit: (item: { id: string }) => void;
 };
 
-function AddItemForm({ list, items, onSubmit }: AddItemFormProps) {
+function AddItemForm({ list, onSubmit }: AddItemFormProps) {
   const [itemName, setItemName] = React.useState("");
+  const { mutate: createItem } = useCreateItem();
 
   return (
     <form
-      action="/list"
+      action={`lists/${list.id}/items`}
+      method="POST"
       onSubmit={(event) => {
         event.preventDefault();
         if (itemName.trim()) {
-          onSubmit(new Item(itemName));
+          createItem(
+            { name: itemName },
+            {
+              onSuccess(item) {
+                console.log("new item:", item);
+                onSubmit({ id: item.id });
+              },
+            }
+          );
           setItemName("");
         }
       }}

@@ -1,14 +1,17 @@
 import * as React from "react";
 import Link from "next/link";
 import { List } from "../model";
+import { useCreateList, useRemoveList } from "../context/lists";
 
 type ListsProps = {
   lists: Pick<List, "id" | "name">[];
   onListSelect: (id: string) => void;
-  onAddList: (name: string) => void;
 };
 
-function Lists({ lists, onListSelect, onAddList }: ListsProps) {
+function Lists({ lists, onListSelect }: ListsProps) {
+  const { mutate: createList } = useCreateList();
+  const { mutate: removeList } = useRemoveList();
+
   return (
     <section>
       <h2>Your Lists</h2>
@@ -16,7 +19,14 @@ function Lists({ lists, onListSelect, onAddList }: ListsProps) {
         <a
           onClick={(e) => {
             e.preventDefault();
-            onAddList("New List");
+            createList(
+              { name: "New List" },
+              {
+                onSuccess(newItem) {
+                  onListSelect(newItem.id);
+                },
+              }
+            );
           }}
         >
           New
@@ -38,6 +48,7 @@ function Lists({ lists, onListSelect, onAddList }: ListsProps) {
               >
                 {name}
               </ListLink>
+              <button onClick={() => removeList({ id })}>Delete</button>
             </li>
           ))}
         </ol>

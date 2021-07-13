@@ -5,7 +5,7 @@ import styled from "@emotion/styled";
 import Header from "../components/Header";
 import Lists from "../components/Lists";
 import Detail from "../components/Detail";
-import { Item, List } from "../model";
+import { List } from "../model";
 import { useLists } from "../context/lists";
 
 type AppState = {
@@ -14,47 +14,13 @@ type AppState = {
 };
 
 function App() {
-  const [lists, setLists] = useLists();
+  const [lists] = useLists();
   const [selectedListId, setSelectedListId] = React.useState<string>();
 
-  const { selectedList, selectedListIndex } = appState({
+  const { selectedList } = appState({
     lists,
     selectedListId,
   });
-
-  const handleItemAdd = React.useCallback(
-    (item: Item) => {
-      if (selectedList) {
-        const newLists = [...lists];
-
-        newLists[selectedListIndex] = {
-          ...selectedList,
-          items: selectedList.items.concat(item),
-        };
-
-        setLists(newLists);
-      }
-    },
-    [lists, setLists, selectedList, selectedListIndex]
-  );
-
-  const handleItemUpdate = React.useCallback(
-    (itemId: string, updates: Partial<Item>) => {
-      if (selectedList) {
-        const newLists = [...lists];
-
-        newLists[selectedListIndex] = {
-          ...selectedList,
-          items: selectedList.items.map((item) =>
-            item.id === itemId ? { ...item, ...updates } : item
-          ),
-        };
-
-        setLists(newLists);
-      }
-    },
-    [lists, setLists, selectedList, selectedListIndex]
-  );
 
   return (
     <Page>
@@ -70,17 +36,8 @@ function App() {
           onListSelect={(id) => {
             setSelectedListId(id);
           }}
-          onAddList={(name) => {
-            setLists(lists.concat(new List(name)));
-          }}
         />
-        {selectedList ? (
-          <Detail
-            list={selectedList}
-            onItemAdd={handleItemAdd}
-            onItemUpdate={handleItemUpdate}
-          />
-        ) : null}
+        {selectedList ? <Detail list={selectedList} /> : null}
       </div>
       <Footer>©2021 Ryan Boone</Footer>
     </Page>
