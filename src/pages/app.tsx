@@ -6,11 +6,12 @@ import { css } from "@emotion/react";
 
 import Lists from "../components/Lists";
 import Detail from "../components/Detail";
-import { useLists } from "../context/lists";
+import { useCreateList, useLists } from "../context/lists";
 
 function App() {
   const [lists] = useLists();
   const [selectedListId, setSelectedListId] = React.useState<string>();
+  const { mutate: createList } = useCreateList();
 
   const selectedList = lists.find((list) => list.id === selectedListId);
 
@@ -31,10 +32,35 @@ function App() {
           flex: 0 0 300px;
           overflow-y: auto;
           background-color: #f4f3fa;
-          padding: 40px;
+          padding: 0 40px 40px;
         `}
       >
-        <h2>Your Lists</h2>
+        <div
+          css={css`
+            position: sticky;
+            top: 0;
+            padding-top: 40px;
+            background-color: #f4f3fa;
+            z-index: 2;
+          `}
+        >
+          <h2>Your Lists</h2>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              createList(
+                { name: "New List" },
+                {
+                  onSuccess(newItem) {
+                    setSelectedListId(newItem.id);
+                  },
+                }
+              );
+            }}
+          >
+            New
+          </button>
+        </div>
         <Lists
           lists={lists}
           onListSelect={(id) => {

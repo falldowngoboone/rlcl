@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { css } from "@emotion/react";
 import { List } from "../model";
-import { useCreateList, useRemoveList } from "../context/lists";
+import { useRemoveList } from "../context/lists";
 
 type ListsProps = {
   lists: Pick<List, "id" | "name">[];
@@ -12,26 +12,10 @@ type ListsProps = {
 };
 
 function Lists({ lists, onListSelect, selectedId }: ListsProps) {
-  const { mutate: createList } = useCreateList();
   const { mutate: removeList } = useRemoveList();
 
   return (
     <>
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          createList(
-            { name: "New List" },
-            {
-              onSuccess(newItem) {
-                onListSelect(newItem.id);
-              },
-            }
-          );
-        }}
-      >
-        New
-      </button>
       {lists.length ? (
         <ol
           css={css`
