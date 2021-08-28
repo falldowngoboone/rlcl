@@ -1,75 +1,108 @@
-import * as React from "react";
+/** @jsxImportSource @emotion/react */
+
 import Link from "next/link";
+import { css } from "@emotion/react";
 import { List } from "../model";
 import { useCreateList, useRemoveList } from "../context/lists";
 
 type ListsProps = {
   lists: Pick<List, "id" | "name">[];
   onListSelect: (id: string) => void;
+  selectedId?: string;
 };
 
-function Lists({ lists, onListSelect }: ListsProps) {
+function Lists({ lists, onListSelect, selectedId }: ListsProps) {
   const { mutate: createList } = useCreateList();
   const { mutate: removeList } = useRemoveList();
 
   return (
-    <section>
-      <h2>Your Lists</h2>
-      <Link href="/new-trip">
-        <a
-          onClick={(e) => {
-            e.preventDefault();
-            createList(
-              { name: "New List" },
-              {
-                onSuccess(newItem) {
-                  onListSelect(newItem.id);
-                },
-              }
-            );
-          }}
-        >
-          New
-        </a>
-      </Link>
-      <form action="/api/trips">
-        <input name="q" />
-      </form>
+    <>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          createList(
+            { name: "New List" },
+            {
+              onSuccess(newItem) {
+                onListSelect(newItem.id);
+              },
+            }
+          );
+        }}
+      >
+        New
+      </button>
       {lists.length ? (
-        <ol>
+        <ol
+          css={css`
+            list-style-type: none;
+            padding: 0;
+
+            & > * + * {
+              margin-top: 8px;
+            }
+          `}
+        >
           {lists.map(({ name, id }) => (
-            <li key={id}>
-              <ListLink
-                href={`/lists/${id}`}
-                onClick={(event) => {
-                  onListSelect(id);
-                  event.preventDefault();
-                }}
+            <li
+              key={id}
+              css={[
+                css`
+                  padding: 16px;
+                  position: relative;
+                  border-radius: 8px;
+
+                  &:hover {
+                    background-color: #e0dbff;
+                  }
+                `,
+                selectedId === id &&
+                  css`
+                    background-color: #8b79f9;
+                    color: #ffffff;
+
+                    &:hover {
+                      background-color: #8b79f9;
+                    }
+                  `,
+              ]}
+            >
+              <Link href={`/lists/${id}`}>
+                <a
+                  css={css`
+                    &::before {
+                      content: "";
+                      position: absolute;
+                      top: 0;
+                      left: 0;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  `}
+                  onClick={(event) => {
+                    onListSelect(id);
+                    event.preventDefault();
+                  }}
+                >
+                  {name}
+                </a>
+              </Link>
+              <button
+                css={css`
+                  position: relative;
+                  z-index: 1;
+                `}
+                onClick={() => removeList({ id })}
               >
-                {name}
-              </ListLink>
-              <button onClick={() => removeList({ id })}>Delete</button>
+                Delete
+              </button>
             </li>
           ))}
         </ol>
       ) : (
         <p>Get started by adding a trip!</p>
       )}
-    </section>
-  );
-}
-
-type ListLinkProps = {
-  href: string;
-  onClick: React.MouseEventHandler;
-  children: React.ReactNode;
-};
-
-function ListLink({ href, onClick, children }: ListLinkProps) {
-  return (
-    <Link href={href}>
-      <a onClick={onClick}>{children}</a>
-    </Link>
+    </>
   );
 }
 

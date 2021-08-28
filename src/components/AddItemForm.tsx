@@ -1,4 +1,7 @@
+/** @jsxImportSource @emotion/react */
+
 import * as React from "react";
+import { css } from "@emotion/react";
 import { useCreateItem } from "../context/items";
 import { List } from "../model";
 
@@ -22,8 +25,7 @@ function AddItemForm({ list, onSubmit }: AddItemFormProps) {
             { name: itemName },
             {
               onSuccess(item) {
-                console.log("new item:", item);
-                onSubmit({ id: item.id });
+                onSubmit(item);
               },
             }
           );
@@ -34,6 +36,10 @@ function AddItemForm({ list, onSubmit }: AddItemFormProps) {
       <input type="hidden" name="list-id" value={list.id} />
       <input type="hidden" name="item-id" value="" />
       <input
+        css={css`
+          width: 100%;
+          font: inherit;
+        `}
         type="text"
         name="item-name"
         value={itemName}

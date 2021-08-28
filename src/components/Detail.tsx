@@ -1,9 +1,13 @@
+/** @jsxImportSource @emotion/react */
+
 import * as React from "react";
+import { css } from "@emotion/react";
 import AddItemForm from "./AddItemForm";
 import ListItem from "./ListItem";
 import { List } from "../model";
 import { useUpdateList } from "../context/lists";
 import { useListItems } from "../context/items";
+import ContentEditable from "./ContentEditable";
 
 type DetailProps = {
   list: List;
@@ -16,57 +20,75 @@ function Detail({ list }: DetailProps) {
   const handleToggle = React.useCallback(
     (itemId: string, checked: boolean) => {
       if (checked) {
-        updateList({ id: list.id, checked: list.checked.concat(itemId) });
+        updateList({ ...list, checked: list.checked.concat(itemId) });
       } else {
         updateList({
-          id: list.id,
+          ...list,
           checked: list.checked.filter((id) => id !== itemId),
         });
       }
     },
-    [updateList, list.checked, list.id]
+    [updateList, list]
   );
 
   const handleAddItem = React.useCallback(
     ({ id }: { id: string }) => {
-      updateList({ id: list.id, items: [id].concat(list.items) });
+      updateList({ ...list, items: [id].concat(list.items) });
     },
-    [list.items, updateList, list.id]
+    [updateList, list]
+  );
+
+  const handleRemoveItem = React.useCallback(
+    (id: string) => {
+      updateList({
+        ...list,
+        items: list.items.filter((itemId) => itemId !== id),
+      });
+    },
+    [updateList, list]
   );
 
   return (
     <main>
-      <h1>
-        <input
-          style={{
-            font: "inherit",
-            padding: ".25em",
-            marginLeft: "-.25em",
-            marginRight: "-.25em",
-            WebkitAppearance: "none",
-            border: "none",
-            borderRadius: "0.25rem",
-          }}
-          type="text"
-          value={list.name}
-          onChange={(event) =>
-            updateList({ id: list.id, name: event.target.value })
-          }
-        />
-      </h1>
+      <ContentEditable
+        as="h1"
+        initialValue={list.name}
+        onChange={(name) => {
+          name && updateList({ id: list.id, name });
+        }}
+      />
       <div>
-        <AddItemForm
-          list={list}
-          onSubmit={(item) => {
-            handleAddItem(item);
-          }}
-        />
-        <ul>
+        <AddItemForm list={list} onSubmit={handleAddItem} />
+        <ul
+          css={css`
+            list-style-type: none;
+            padding: 0;
+
+            & > * + * {
+              margin-top: 8px;
+            }
+          `}
+        >
           {listItems.map((item) => (
-            <li key={item.id}>
+            <li
+              key={item.id}
+              css={css`
+                display: flex;
+                justify-content: space-between;
+                padding: 8px;
+                margin-left: -8px;
+                margin-right: -8px;
+
+                &:hover,
+                &:focus-within {
+                  background-color: #f9f9fc;
+                }
+              `}
+            >
               <ListItem
                 item={item}
                 onToggle={(checked) => handleToggle(item.id, checked)}
+                onRemove={() => handleRemoveItem(item.id)}
                 checked={list.checked.includes(item.id)}
               />
             </li>
