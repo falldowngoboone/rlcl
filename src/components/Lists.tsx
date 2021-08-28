@@ -4,6 +4,7 @@ import Link from "next/link";
 import { css } from "@emotion/react";
 import { List } from "../model";
 import { useRemoveList } from "../context/lists";
+import IconButton from "./IconButton";
 
 type ListsProps = {
   lists: Pick<List, "id" | "name">[];
@@ -35,6 +36,9 @@ function Lists({ lists, onListSelect, selectedId }: ListsProps) {
                   padding: 16px;
                   position: relative;
                   border-radius: 8px;
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
 
                   &:hover {
                     background-color: #e0dbff;
@@ -71,15 +75,16 @@ function Lists({ lists, onListSelect, selectedId }: ListsProps) {
                   {name}
                 </a>
               </Link>
-              <button
+              <IconButton
                 css={css`
                   position: relative;
                   z-index: 1;
+                  align-self: flex-start;
                 `}
+                variant="trash"
+                label="Delete"
                 onClick={() => removeList({ id })}
-              >
-                Delete
-              </button>
+              />
             </li>
           ))}
         </ol>

@@ -64,7 +64,7 @@ const Button = styled.button`
   appearance: none;
   margin: 0;
   padding: 0;
-  display: flex;
+  display: inline-flex;
 `;
 
 type IconButtonProps = {
