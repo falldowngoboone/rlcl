@@ -22,10 +22,7 @@ function Lists({ lists, onListSelect, selectedId }: ListsProps) {
           css={css`
             list-style-type: none;
             padding: 0;
-
-            & > * + * {
-              margin-top: 8px;
-            }
+            margin: 0;
           `}
         >
           {lists.map(({ name, id }) => (
@@ -33,14 +30,14 @@ function Lists({ lists, onListSelect, selectedId }: ListsProps) {
               key={id}
               css={[
                 css`
-                  padding: 16px;
+                  padding: 8px 24px;
                   position: relative;
-                  border-radius: 8px;
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
 
-                  &:hover {
+                  &:hover,
+                  &:focus-within {
                     background-color: #e0dbff;
                   }
                 `,
@@ -49,15 +46,18 @@ function Lists({ lists, onListSelect, selectedId }: ListsProps) {
                     background-color: #8b79f9;
                     color: #ffffff;
 
-                    &:hover {
+                    &:hover,
+                    &:focus-within {
                       background-color: #8b79f9;
                     }
                   `,
               ]}
             >
-              <Link href={`/lists/${id}`}>
+              <Link href={`/lists/${id}`} passHref>
                 <a
                   css={css`
+                    text-decoration: none;
+
                     &::before {
                       content: "";
                       position: absolute;
@@ -80,6 +80,12 @@ function Lists({ lists, onListSelect, selectedId }: ListsProps) {
                   position: relative;
                   z-index: 1;
                   align-self: flex-start;
+                  opacity: 0;
+
+                  *:hover > &,
+                  &:focus-within {
+                    opacity: 1;
+                  }
                 `}
                 variant="trash"
                 label="Delete"

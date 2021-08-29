@@ -32,19 +32,24 @@ function App() {
           flex: 0 0 300px;
           overflow-y: auto;
           background-color: #f4f3fa;
-          padding: 0 40px 40px;
         `}
       >
         <div
           css={css`
             position: sticky;
             top: 0;
-            padding-top: 40px;
+            padding: 40px 24px 16px;
             background-color: #f4f3fa;
             z-index: 2;
           `}
         >
-          <h2>Your Lists</h2>
+          <h2
+            css={css`
+              margin: 0;
+            `}
+          >
+            Your Lists
+          </h2>
           <button
             onClick={(e) => {
               e.preventDefault();

@@ -68,7 +68,7 @@ function useCreateList() {
   const mutate = React.useCallback(
     ({ name }, { onSuccess }: { onSuccess: (list: List) => void }) => {
       client(`lists/`, { method: "POST", data: { name } }).then((newList) => {
-        setLists((lists) => lists.concat(newList));
+        setLists((lists) => [newList].concat(lists));
         onSuccess?.(newList);
       });
     },

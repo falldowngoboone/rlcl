@@ -123,7 +123,7 @@ function getRecordType(resource: string) {
 }
 
 function id() {
-  return String(`$_${_id++}`);
+  return String(`${_id++}`);
 }
 
 export { client };
