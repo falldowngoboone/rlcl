@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Head from "next/head";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 
 import Lists from "../components/Lists";
 import Detail from "../components/Detail";
@@ -12,6 +12,7 @@ function App() {
   const [lists] = useLists();
   const [selectedListId, setSelectedListId] = React.useState<string>();
   const { mutate: createList } = useCreateList();
+  const theme = useTheme();
 
   const selectedList = lists.find((list) => list.id === selectedListId);
 
@@ -20,6 +21,7 @@ function App() {
       css={css`
         display: flex;
         height: 100vh;
+        color: ${theme.color.textPrimary};
       `}
     >
       <Head>
@@ -30,27 +32,50 @@ function App() {
       <section
         css={css`
           flex: 0 0 300px;
-          overflow-y: auto;
-          background-color: #f4f3fa;
+          height: 100%;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+
+          & > * + * {
+            margin-top: ${theme.space[2]};
+          }
         `}
       >
         <div
           css={css`
-            position: sticky;
-            top: 0;
-            padding: 40px 24px 16px;
-            background-color: #f4f3fa;
-            z-index: 2;
+            padding-left: ${theme.space[3]};
+            padding-right: ${theme.space[3]};
+          `}
+        >
+          Account Information
+        </div>
+        <div
+          css={css`
+            display: flex;
+            justify-content: space-between;
+            padding-left: ${theme.space[3]};
+            padding-right: ${theme.space[3]};
           `}
         >
           <h2
             css={css`
               margin: 0;
+              font-size: 20px;
             `}
           >
             Your Lists
           </h2>
           <button
+            css={css`
+              appearance: none;
+              color: ${theme.color.textCallout};
+              background-color: ${theme.color.surfaceCallout};
+              border: 0;
+              border-radius: ${theme.radius.small};
+              display: inline-block;
+              padding: 0 8px;
+            `}
             onClick={(e) => {
               e.preventDefault();
               createList(
@@ -66,13 +91,22 @@ function App() {
             New
           </button>
         </div>
-        <Lists
-          lists={lists}
-          onListSelect={(id) => {
-            setSelectedListId(id);
-          }}
-          selectedId={selectedListId}
-        />
+        <div
+          css={css`
+            max-height: 100%;
+            overflow-y: auto;
+            padding-left: ${theme.space[3]};
+            padding-right: ${theme.space[3]};
+          `}
+        >
+          <Lists
+            lists={lists}
+            onListSelect={(id) => {
+              setSelectedListId(id);
+            }}
+            selectedId={selectedListId}
+          />
+        </div>
       </section>
       <div
         css={css`

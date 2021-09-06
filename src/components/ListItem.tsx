@@ -1,8 +1,7 @@
 /** @jsxImportSource @emotion/react */
 
 import * as React from "react";
-import { css, Interpolation, Theme } from "@emotion/react";
-import styled from "@emotion/styled";
+import { css, Interpolation, Theme, useTheme } from "@emotion/react";
 import { useUpdateItem } from "../context/items";
 
 import { Item } from "../model";
@@ -20,6 +19,7 @@ function ListItem({ item, checked, onToggle, onRemove }: ListItemProps) {
   const [itemName, setItemName] = React.useState(item.name);
   const nameEditInput = React.useRef<HTMLInputElement>(null);
   const { mutate: updateItem } = useUpdateItem();
+  const theme = useTheme();
 
   React.useEffect(() => {
     if (editView && nameEditInput.current) {
@@ -91,7 +91,7 @@ function ListItem({ item, checked, onToggle, onRemove }: ListItemProps) {
           display: flex;
 
           & > * + * {
-            margin-left: 8px;
+            margin-left: ${theme.space[0]};
           }
         `}
       >
@@ -107,7 +107,7 @@ function ListItem({ item, checked, onToggle, onRemove }: ListItemProps) {
             checked &&
             css`
               text-decoration: line-through;
-              color: #9795a1;
+              color: ${theme.color.textSecondary};
             `
           }
         >
@@ -126,7 +126,7 @@ function ListItem({ item, checked, onToggle, onRemove }: ListItemProps) {
           }
 
           & > button + button {
-            margin-left: 8px;
+            margin-left: ${theme.space[0]};
           }
         `}
       >
@@ -147,6 +147,8 @@ type CheckBoxProps = React.ClassAttributes<HTMLInputElement> &
   };
 
 function CheckBox({ type: _ignored, ...props }: CheckBoxProps) {
+  const theme = useTheme();
+
   return (
     <span
       css={css`
@@ -159,16 +161,16 @@ function CheckBox({ type: _ignored, ...props }: CheckBoxProps) {
             appearance: none;
             height: 24px;
             width: 24px;
-            background-color: #f4f3fa;
-            border-radius: 4px;
-            box-shadow: inset -1px 1px 4px #c4c2cf;
+            background-color: ${theme.color.surfacePrimary};
+            border-radius: ${theme.radius.small};
+            box-shadow: ${theme.shadow.inset};
             margin: 0;
             display: block;
           `,
           props.checked &&
             css`
-              background-color: #3a2c8e;
-              box-shadow: inset -1px 1px 2px #332b64;
+              background-color: ${theme.color.surfaceCallout};
+              box-shadow: none;
             `,
         ]}
         type="checkbox"

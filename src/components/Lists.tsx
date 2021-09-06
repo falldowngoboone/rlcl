@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 
 import Link from "next/link";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import { List } from "../model";
 import { useRemoveList } from "../context/lists";
 import IconButton from "./IconButton";
@@ -14,6 +14,7 @@ type ListsProps = {
 
 function Lists({ lists, onListSelect, selectedId }: ListsProps) {
   const { mutate: removeList } = useRemoveList();
+  const theme = useTheme();
 
   return (
     <>
@@ -21,8 +22,12 @@ function Lists({ lists, onListSelect, selectedId }: ListsProps) {
         <ol
           css={css`
             list-style-type: none;
-            padding: 0;
             margin: 0;
+            padding: 0;
+
+            & > * + * {
+              margin-top: 0.5rem;
+            }
           `}
         >
           {lists.map(({ name, id }) => (
@@ -30,26 +35,22 @@ function Lists({ lists, onListSelect, selectedId }: ListsProps) {
               key={id}
               css={[
                 css`
-                  padding: 8px 24px;
+                  padding: 8px 16px;
                   position: relative;
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
+                  border-radius: ${theme.radius.large};
 
                   &:hover,
                   &:focus-within {
-                    background-color: #e0dbff;
+                    background-color: ${theme.color.surfaceSecondary};
                   }
                 `,
                 selectedId === id &&
                   css`
-                    background-color: #8b79f9;
-                    color: #ffffff;
-
-                    &:hover,
-                    &:focus-within {
-                      background-color: #8b79f9;
-                    }
+                    background-color: ${theme.color.surfaceSecondary};
+                    font-weight: 700;
                   `,
               ]}
             >

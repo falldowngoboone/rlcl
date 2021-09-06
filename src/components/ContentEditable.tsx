@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Interpolation, Theme } from "@emotion/react";
 
 type ListNameProps = {
   as?: React.ElementType;
@@ -10,7 +11,10 @@ function ContentEditable({
   as: Component = "div",
   initialValue,
   onChange,
-}: ListNameProps) {
+  ...props
+}: ListNameProps & {
+  css?: Interpolation<Theme>;
+}) {
   const editBoxRef = React.useRef<HTMLHeadingElement>(null);
 
   React.useEffect(() => {
@@ -55,6 +59,7 @@ function ContentEditable({
       ref={editBoxRef}
       onBlur={handleBlur}
       onInput={handleInput}
+      {...props}
     />
   );
 }

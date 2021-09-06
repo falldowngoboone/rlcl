@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 
 import * as React from "react";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import AddItemForm from "./AddItemForm";
 import ListItem from "./ListItem";
 import { List } from "../model";
@@ -16,6 +16,7 @@ type DetailProps = {
 function Detail({ list }: DetailProps) {
   const { mutate: updateList } = useUpdateList();
   const listItems = useListItems(list.id);
+  const theme = useTheme();
 
   const handleToggle = React.useCallback(
     (itemId: string, checked: boolean) => {
@@ -56,6 +57,10 @@ function Detail({ list }: DetailProps) {
         onChange={(name) => {
           name && updateList({ id: list.id, name });
         }}
+        css={css`
+          margin-top: min(15vw, ${theme.space[6]});
+          font-size: 36px;
+        `}
       />
       <div>
         <AddItemForm list={list} onSubmit={handleAddItem} />
@@ -65,7 +70,7 @@ function Detail({ list }: DetailProps) {
             padding: 0;
 
             & > * + * {
-              margin-top: 8px;
+              margin-top: ${theme.space[0]};
             }
           `}
         >
@@ -75,13 +80,13 @@ function Detail({ list }: DetailProps) {
               css={css`
                 display: flex;
                 justify-content: space-between;
-                padding: 8px;
-                margin-left: -8px;
-                margin-right: -8px;
+                padding: ${theme.space[0]};
+                margin-left: -${theme.space[0]};
+                margin-right: -${theme.space[0]};
 
                 &:hover,
                 &:focus-within {
-                  background-color: #f9f9fc;
+                  background-color: ${theme.color.surfaceSecondary};
                 }
               `}
             >
