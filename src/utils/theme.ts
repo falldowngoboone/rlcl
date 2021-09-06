@@ -19,7 +19,7 @@ const theme = {
     iconPrimary: "#7a8ea5",
   } as const,
   shadow: {
-    inset: "box-shadow: inset -1px 1px 4px #c4c2cf",
+    inset: "inset -1px 1px 4px #c4c2cf",
   } as const,
   radius: {
     small: "4px",
