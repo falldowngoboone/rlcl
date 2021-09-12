@@ -7,6 +7,7 @@ import { css, useTheme } from "@emotion/react";
 import Lists from "../components/Lists";
 import Detail from "../components/Detail";
 import { useCreateList, useLists } from "../context/lists";
+import AccountMenu from "../components/AccountMenu";
 
 function App() {
   const [lists] = useLists();
@@ -36,20 +37,14 @@ function App() {
           overflow: hidden;
           display: flex;
           flex-direction: column;
+          border-right: ${theme.border.subtle};
 
           & > * + * {
             margin-top: ${theme.space[2]};
           }
         `}
       >
-        <div
-          css={css`
-            padding-left: ${theme.space[3]};
-            padding-right: ${theme.space[3]};
-          `}
-        >
-          Account Information
-        </div>
+        <AccountMenu />
         <div
           css={css`
             display: flex;

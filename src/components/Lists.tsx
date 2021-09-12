@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { css, useTheme } from "@emotion/react";
 import { List } from "../model";
-import { useRemoveList } from "../context/lists";
-import IconButton from "./IconButton";
+import ListActions from "./ListActions";
 
 type ListsProps = {
   lists: Pick<List, "id" | "name">[];
@@ -13,7 +12,6 @@ type ListsProps = {
 };
 
 function Lists({ lists, onListSelect, selectedId }: ListsProps) {
-  const { mutate: removeList } = useRemoveList();
   const theme = useTheme();
 
   return (
@@ -23,7 +21,7 @@ function Lists({ lists, onListSelect, selectedId }: ListsProps) {
           css={css`
             list-style-type: none;
             margin: 0;
-            padding: 0;
+            padding: 0 0 ${theme.space[3]};
 
             & > * + * {
               margin-top: 0.5rem;
@@ -76,22 +74,7 @@ function Lists({ lists, onListSelect, selectedId }: ListsProps) {
                   {name}
                 </a>
               </Link>
-              <IconButton
-                css={css`
-                  position: relative;
-                  z-index: 1;
-                  align-self: flex-start;
-                  opacity: 0;
-
-                  *:hover > &,
-                  &:focus-within {
-                    opacity: 1;
-                  }
-                `}
-                variant="trash"
-                label="Delete"
-                onClick={() => removeList({ id })}
-              />
+              <ListActions id={id} />
             </li>
           ))}
         </ol>

@@ -20,11 +20,15 @@ const theme = {
   } as const,
   shadow: {
     inset: "inset -1px 1px 4px #c4c2cf",
+    drop: "drop-shadow(-1px 1px 4px rgba(0, 0, 0, 0.25))",
   } as const,
   radius: {
     small: "4px",
     large: "8px",
   } as const,
+  border: {
+    subtle: "1px solid #0d3f7a22",
+  },
 };
 
 export default theme;
