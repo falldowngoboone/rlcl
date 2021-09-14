@@ -118,7 +118,6 @@ function ListItem({ item, checked, onToggle, onRemove }: ListItemProps) {
         css={css`
           opacity: 0;
           display: flex;
-          filter: ${theme.shadow.drop};
 
           *:hover > &,
           &:focus-within {
