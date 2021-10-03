@@ -130,4 +130,6 @@ function App() {
   );
 }
 
+App.authRequired = true;
+
 export default App;

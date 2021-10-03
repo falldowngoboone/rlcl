@@ -1,9 +1,9 @@
 /** @jsxImportSource @emotion/react */
-import Link from "next/link";
+
 import {
   Menu,
   MenuButton,
-  MenuLink,
+  MenuItem,
   MenuPopover,
   MenuItems,
 } from "@reach/menu-button";
@@ -12,6 +12,7 @@ import Icon from "./Icon";
 
 import { css, useTheme } from "@emotion/react";
 import MenuBox from "./MenuBox";
+import { signOut } from "next-auth/react";
 
 function AccountMenu() {
   const theme = useTheme();
@@ -59,21 +60,20 @@ function AccountMenu() {
         }}
       >
         <MenuItems as={MenuBox}>
-          <Link href="/" passHref>
-            <MenuLink
-              css={css`
-                color: ${theme.color.textPrimary};
-                padding: ${theme.space[0]} ${theme.space[1]};
-                display: block;
+          <MenuItem
+            onSelect={signOut}
+            css={css`
+              color: ${theme.color.textPrimary};
+              padding: ${theme.space[0]} ${theme.space[1]};
+              display: block;
 
-                &[data-selected] {
-                  background-color: ${theme.color.surfaceCallout}11;
-                }
-              `}
-            >
-              Sign out
-            </MenuLink>
-          </Link>
+              &[data-selected] {
+                background-color: ${theme.color.surfaceCallout}11;
+              }
+            `}
+          >
+            Sign out
+          </MenuItem>
         </MenuItems>
       </MenuPopover>
     </Menu>
