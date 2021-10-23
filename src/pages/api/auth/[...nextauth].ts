@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export default NextAuth({
+  session: { jwt: true },
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -13,12 +14,20 @@ export default NextAuth({
         },
         password: { label: "Password", type: "password" },
       },
-      async authorize() {
-        return {
-          id: "1",
-          name: "Ryan Boone",
-          email: "falldowngoboone@gmail.com",
-        };
+      // @ts-ignore - see https://github.com/nextauthjs/next-auth/issues/2080
+      async authorize({ username, password }, req) {
+        if (
+          username === "falldowngoboone@gmail.com" &&
+          password === "password"
+        ) {
+          return {
+            id: "1",
+            name: "Ryan Boone",
+            email: "falldowngoboone@gmail.com",
+          };
+        }
+
+        return null;
       },
     }),
   ],
